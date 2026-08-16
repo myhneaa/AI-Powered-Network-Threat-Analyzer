@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 
 class Config(object):
     """
@@ -19,15 +19,17 @@ class Config(object):
         if not self._is_initialized:
             load_dotenv()
             self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
+            self.client = None
             
             if self.gemini_api_key:
-                genai.configure(api_key=self.gemini_api_key)
+                self.client = genai.Client(api_key=self.gemini_api_key)
                 
             self._is_initialized = True
 
     def get_api_key(self):
         return self.gemini_api_key
 
-    def setup_gemini_model(self, model_name="gemini-1.5-pro"):
-        """Returns an instance of the GenerativeModel."""
-        return genai.GenerativeModel(model_name)
+    def get_client(self):
+        """Returns an instance of the GenerativeAI Client."""
+        return self.client
+

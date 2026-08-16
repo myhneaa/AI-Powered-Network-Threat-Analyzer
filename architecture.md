@@ -1,16 +1,16 @@
-# Arhitectură și UML
+# Architecture and UML
 
-Acest document descrie arhitectura sistemului "Garda de Fier pe Rețea" (AI-Powered Network Threat Analyzer) și satisface cerințele legate de specificații și Design Patterns.
+This document describes the architecture of the "Iron Guard Network" (AI-Powered Network Threat Analyzer) system and satisfies the requirements related to specifications and Design Patterns.
 
-## Workflow-ul Sistemului
+## System Workflow
 
-Sistemul urmează un flux clar de date:
-1. **Intrare:** Un fișier de log (ex. access log) care este citit linie cu linie de `LogParser`.
-2. **Notificare:** Atunci când `LogParser` identifică o linie suspectă, notifică toți agenții abonați folosind design pattern-ul **Observer**.
-3. **Analiza (Agent 1):** `DetectiveAgent` primește alerta, analizează structura folosind modelul LLM (Google Gemini) și returnează o clasificare (ex. SQL Injection) cu un scor de risc (1-10).
-4. **Remediere (Agent 2):** `RemediationAgent` primește datele de la Detective, generează automat comanda de mitigare (ex. o regulă `iptables`) și generează un scurt raport de incident.
+The system follows a clear data flow:
+1. **Input:** A log file (e.g., access log) that is read line by line by `LogParser`.
+2. **Notification:** When `LogParser` identifies a suspicious line, it notifies all subscribed agents using the **Observer** design pattern.
+3. **Analysis (Agent 1):** `DetectiveAgent` receives the alert, analyzes the payload using the LLM model (Google Gemini), and returns a classification (e.g., SQL Injection) along with a risk score (1-10).
+4. **Remediation (Agent 2):** `RemediationAgent` receives the data from the Detective, automatically generates the mitigation command (e.g., an `iptables` rule), and generates a short incident report.
 
-## Diagramă de Clase (UML)
+## Class Diagram (UML)
 
 ```mermaid
 classDiagram
@@ -20,7 +20,7 @@ classDiagram
         - String gemini_api_key
         + Config()
         + get_api_key() String
-        + setup_gemini_model(model_name) GenerativeModel
+        + get_client() Client
     }
     
     class Subject {
@@ -47,7 +47,7 @@ classDiagram
     
     class BaseAgent {
         # Config config
-        # GenerativeModel model
+        # Client client
         + update(data: dict)
     }
     
@@ -69,7 +69,7 @@ classDiagram
     BaseAgent --> Config : uses
 ```
 
-## Design Patterns Utilizate
+## Design Patterns Used
 
-1. **Singleton (`Config`):** Asigură existența unei singure instanțe de configurare în întreg sistemul, mai ales pentru gestionarea eficientă a sesiunii cu API-ul extern (Gemini).
-2. **Observer (`Subject` / `Observer`):** Decuplează modulul de citire log-uri (`LogParser`) de agenții de inteligență artificială. Orice număr de agenți pot fi adăugați (ex: un agent de notificare Slack) fără a modifica logica de citire a fișierului.
+1. **Singleton (`Config`):** Ensures the existence of a single configuration instance throughout the system, especially for efficiently managing the session with the external API (Gemini).
+2. **Observer (`Subject` / `Observer`):** Decouples the log reading module (`LogParser`) from the AI agents. Any number of agents can be added (e.g., a Slack notification agent) without modifying the file reading logic.

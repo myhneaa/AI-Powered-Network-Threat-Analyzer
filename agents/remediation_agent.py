@@ -50,7 +50,10 @@ class RemediationAgent(BaseAgent):
                 report = f"INCIDENT REPORT\nType: {threat_data['classification']}\nIP: {original_data['ip']}\nRisk: {threat_data['risk_score']}/10\nReason: {threat_data['reason']}"
                 return {"firewall_rule": rule, "incident_report": report}
                 
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt
+            )
             text = response.text
             
             rule = "iptables command not found"

@@ -6,7 +6,7 @@ import os
 
 def main():
     print("="*50)
-    print("Garda de Fier pe Rețea - AI-Powered Threat Analyzer")
+    print("Iron Guard Network - AI-Powered Threat Analyzer")
     print("="*50)
 
     # Make sure we have a dummy log file to parse if none exists

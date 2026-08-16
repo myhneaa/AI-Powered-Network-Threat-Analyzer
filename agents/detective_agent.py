@@ -46,7 +46,10 @@ class DetectiveAgent(BaseAgent):
                     return {"is_threat": True, "classification": "SQL Injection", "risk_score": 9, "reason": "SQL syntax found"}
                 return {"is_threat": False}
                 
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt
+            )
             # Simple json parsing (assuming model follows instructions)
             text = response.text.strip().replace("```json", "").replace("```", "")
             result = json.loads(text)
