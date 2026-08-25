@@ -9,7 +9,6 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
 ```text
 .
 ├── .env                  # API keys (not in version control)
-├── README.md             # Project documentation
 ├── access.log            # Dummy access log to be parsed
 ├── agents/               # AI Agents directory
 │   ├── base_agent.py
@@ -18,6 +17,7 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
 ├── config.py             # Configuration Singleton
 ├── log_parser.py         # Log parser and Observer Subject
 ├── main.py               # Application entry point
+├── README.md             # Project documentation
 ├── reports/              # Auto-generated incident reports
 ├── requirements.txt      # Python dependencies
 └── tests/                # Automated pytest suite
@@ -61,7 +61,7 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
 
 ## Architecture and UML
 
-This section describes the architecture of NetworkGuard(AI-Powered Network Threat Analyzer) and satisfies the requirements related to specifications and Design Patterns.
+NetworkGuard is built upon the following logical structure:
 
 ### System Workflow
 
