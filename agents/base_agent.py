@@ -9,7 +9,8 @@ class BaseAgent(Observer):
     def __init__(self, name: str):
         self.name = name
         self.config = Config()
-        self.client = self.config.get_client()
+        self.gemini_client = self.config.get_gemini_client()
+        self.groq_client = self.config.get_groq_client()
 
     def update(self, data: dict):
         """

@@ -27,7 +27,7 @@ class RemediationAgent(BaseAgent):
 
     def generate_remediation(self, threat_data: dict, original_data: dict):
         """
-        Uses Gemini to generate firewall rules and a formal report.
+        Uses Groq (e.g. Llama-3) to generate firewall rules and a formal report.
         """
         prompt = f"""
         You are a SOC Analyst. We detected a {threat_data['classification']} attack with a risk score of {threat_data['risk_score']}/10.
@@ -44,25 +44,34 @@ class RemediationAgent(BaseAgent):
         """
         
         try:
-            if not self.config.get_api_key():
+            if not self.config.get_groq_api_key():
                 # Mocked behavior
                 rule = f"iptables -A INPUT -s {original_data['ip']} -j DROP"
                 report = f"INCIDENT REPORT\nType: {threat_data['classification']}\nIP: {original_data['ip']}\nRisk: {threat_data['risk_score']}/10\nReason: {threat_data['reason']}"
                 return {"firewall_rule": rule, "incident_report": report}
                 
-            response = self.client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt
+            response = self.groq_client.chat.completions.create(
+                model="qwen/qwen3.6-27b",
+                messages=[
+                    {"role": "system", "content": "You are a helpful SOC Analyst."},
+                    {"role": "user", "content": prompt}
+                ]
             )
-            text = response.text
+            text = response.choices[0].message.content
+            
+            # Remove <think> blocks if they exist (used by deepseek/qwen reasoning models)
+            import re
+            text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
             
             rule = "iptables command not found"
             report_text = "Report not found"
             
             if "---FIREWALL RULE---" in text and "---REPORT---" in text:
-                parts = text.split("---REPORT---")
-                rule = parts[0].replace("---FIREWALL RULE---", "").strip()
-                report_text = parts[1].strip()
+                rule_start = text.find("---FIREWALL RULE---") + len("---FIREWALL RULE---")
+                report_start = text.find("---REPORT---")
+                
+                rule = text[rule_start:report_start].strip()
+                report_text = text[report_start + len("---REPORT---"):].strip()
                 
             return {"firewall_rule": rule, "incident_report": report_text}
         except Exception as e:

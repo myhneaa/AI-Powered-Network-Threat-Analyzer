@@ -38,18 +38,15 @@ class DetectiveAgent(BaseAgent):
         """
         
         try:
-            # We would normally call the API, but to avoid billing/hanging if key is not set,
-            # we'll use a mocked response if key is missing, or actual API if present.
-            if not self.config.get_api_key():
+            if not self.config.get_gemini_api_key():
                 # Mocked behavior for demonstration when no key is set
-                if "OR" in data['payload'] or "1=1" in data['payload']:
-                    return {"is_threat": True, "classification": "SQL Injection", "risk_score": 9, "reason": "SQL syntax found"}
+                if "OR" in data['payload'] or "1=1" in data['payload'] or "etc/passwd" in data['payload']:
+                    classification = "SQL Injection" if "OR" in data['payload'] else "Path Traversal"
+                    return {"is_threat": True, "classification": classification, "risk_score": 9, "reason": "Suspicious payload syntax found"}
                 return {"is_threat": False}
-                
-            response = self.client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt
-            )
+
+            chat = self.gemini_client.chats.create(model='gemini-3.6-flash')
+            response = chat.send_message(prompt)
             # Simple json parsing (assuming model follows instructions)
             text = response.text.strip().replace("```json", "").replace("```", "")
             result = json.loads(text)

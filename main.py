@@ -6,7 +6,7 @@ import os
 
 def main():
     print("="*50)
-    print("Iron Guard Network - AI-Powered Threat Analyzer")
+    print("NetworkGuard - AI-Powered Threat Analyzer")
     print("="*50)
 
     # Make sure we have a dummy log file to parse if none exists
@@ -18,10 +18,10 @@ def main():
 
     # Initialize Config
     config = Config()
-    if not config.get_api_key():
-        print("[WARNING] GEMINI_API_KEY not found in environment variables. Using mocked AI responses for demonstration.")
+    if not config.get_gemini_api_key() or not config.get_groq_api_key():
+        print("[WARNING] One or more API keys (Gemini/Groq) are missing in .env. Using mocked AI responses for those agents.")
     else:
-        print("[INFO] Gemini API Key loaded successfully.")
+        print("[INFO] All API Keys loaded successfully.")
 
     # Initialize components
     parser = LogParser(log_file)

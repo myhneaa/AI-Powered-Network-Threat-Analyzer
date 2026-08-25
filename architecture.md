@@ -1,6 +1,6 @@
 # Architecture and UML
 
-This document describes the architecture of the "Iron Guard Network" (AI-Powered Network Threat Analyzer) system and satisfies the requirements related to specifications and Design Patterns.
+This document describes the architecture of the "NetworkGuard" (AI-Powered Network Threat Analyzer) system and satisfies the requirements related to specifications and Design Patterns.
 
 ## System Workflow
 

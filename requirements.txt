@@ -1,4 +1,5 @@
 google-genai
+groq
 pytest
 streamlit
 python-dotenv
