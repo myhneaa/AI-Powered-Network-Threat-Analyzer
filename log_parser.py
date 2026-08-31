@@ -57,6 +57,37 @@ class LogParser(Subject):
         
         return {"ip": ip, "payload": payload, "raw_line": line}
 
+    def is_suspicious(self, payload: str) -> bool:
+        """
+        Acts as a fast heuristic pre-filter.
+        Checks for common cyber attack signatures before sending to the AI.
+        """
+        payload_upper = payload.upper()
+        
+        # 1. SQL Injection Signatures
+        sqli_patterns = ["'", '"', "UNION", "SELECT", "INSERT", "OR 1=1", "OR '1'='1"]
+        if any(pattern in payload_upper for pattern in sqli_patterns):
+            return True
+            
+        # 2. Path Traversal Signatures
+        traversal_patterns = ["../", "..\\", "/ETC/PASSWD", "SYSTEM.INI", "%2E%2E%2F"]
+        if any(pattern in payload_upper for pattern in traversal_patterns):
+            return True
+            
+        # 3. Cross-Site Scripting (XSS) Signatures
+        xss_patterns = ["<SCRIPT>", "JAVASCRIPT:", "ONERROR=", "ONLOAD=", "%3CSCRIPT%3E"]
+        if any(pattern in payload_upper for pattern in xss_patterns):
+            return True
+            
+        # 4. Command Injection Signatures
+        cmd_patterns = [";", "|", "&&", "$(", "`"]
+        # Basic check to avoid flagging normal URLs with query params too aggressively, 
+        # but in a security context, we flag and let AI decide.
+        if any(pattern in payload_upper for pattern in cmd_patterns):
+            return True
+            
+        return False
+
     def parse_file(self):
         """
         Reads the file line by line and triggers the analysis.
@@ -70,9 +101,9 @@ class LogParser(Subject):
                         
                     data = self.extract_ip_and_payload(line)
                     
-                    # We consider requests with query parameters or strange characters as worth investigating by AI
-                    if "?" in data["payload"] or "%" in data["payload"] or "<" in data["payload"]:
-                        print(f"[LogParser] Suspicious line found from IP {data['ip']}. Notifying agents...")
+                    # Pre-filter: Only notify the heavy AI agents if the heuristic engine flags it
+                    if self.is_suspicious(data["payload"]):
+                        print(f"[LogParser] Heuristic signature matched from IP {data['ip']}. Forwarding to AI for deep analysis...")
                         self.notify(data)
                         
                     time.sleep(0.5) # Simulate real-time log reading

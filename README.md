@@ -2,6 +2,8 @@
 
 NetworkGuard is an automated cybersecurity monitoring system that parses network logs in real-time, leverages multiple Artificial Intelligence models to classify malicious payloads, and autonomously generates mitigation strategies (firewall rules) and formal incident reports.
 
+> **Disclaimer (Proof of Concept):** This project was developed as an educational demonstration of Multi-Agent LLM architectures. While it successfully parses real Apache/Nginx log formats and utilizes genuine heuristic intrusion detection patterns, it is a Proof of Concept. It is not designed for enterprise production environments as it lacks the asynchronous message queuing (e.g., Kafka) required to prevent LLM API rate-limiting under high traffic, and its automated proposed remediation should be manually reviewed in the real world to prevent IP spoofing DoS attacks.
+
 ---
 
 ## Project Structure
