@@ -1,7 +1,8 @@
 import json
 from agents.base_agent import BaseAgent
+from log_parser import Observer
 
-class DetectiveAgent(BaseAgent):
+class DetectiveAgent(BaseAgent, Observer):
     """
     Analyzes the payload to detect and classify threats.
     """
