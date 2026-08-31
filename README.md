@@ -61,6 +61,27 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
 
 ---
 
+## Specifications
+
+- **Ingestion:** Ingests and parses standard Apache/Nginx web server access logs.
+- **Pre-filtering:** Implements a lightweight Heuristic Pre-filter to drop benign traffic and prevent AI API rate-limiting.
+- **Multi-Agent AI:** Utilizes a decoupled Multi-Agent AI system to analyze suspicious traffic.
+  - **Agent 1 (Detective):** Classifies the attack type and assign a risk score using a high-reasoning LLM (Google Gemini).
+  - **Agent 2 (Remediation):** Automatically generates actionable mitigation commands (e.g., `iptables`) and draft formal SOC incident reports using a high-speed LLM (Groq/Mixtral).
+- **Architecture:** Adheres to Object-Oriented Programming principles, explicitly implementing the **Singleton** and **Observer** design patterns.
+- **Verification:** Includes automated test coverage (via `pytest`) and a CI/CD pipeline (GitHub Actions).
+
+## Backlog & Future Work (TODO)
+- [x] Scaffold Architecture (Singleton, Observer)
+- [x] Implement Regex Heuristic Pre-filter
+- [x] Integrate Google Gemini for Threat Classification
+- [x] Integrate Groq (Mixtral) for Threat Mitigation & Report Generating
+- [x] Implement Pytest Suite and GitHub Actions
+- [ ] **Build a Graphical User Interface (GUI) for the SOC dashboard**
+- [ ] Implement Asynchronous Message Queues (e.g., RabbitMQ/Kafka) for enterprise scalability
+
+---
+
 ## Architecture and UML
 
 NetworkGuard is built upon the following logical structure:
@@ -169,3 +190,4 @@ The use of AI tools significantly improved the structural integrity of the proje
 - [Singleton Design Pattern](https://www.geeksforgeeks.org/system-design/singleton-design-pattern/)
 - [Observer Design Pattern](https://www.geeksforgeeks.org/system-design/observer-pattern-set-1-introduction/)
 - [Example Apache Error log](https://raw.githubusercontent.com/logpai/loghub/master/Apache/Apache_2k.log)
+- [freeCodeCamp UML Diagrams Full Course](https://www.youtube.com/watch?v=WnMQ8HlmeXc)
