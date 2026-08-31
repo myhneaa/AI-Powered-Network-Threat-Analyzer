@@ -108,28 +108,28 @@ classDiagram
         + detach(observer: Observer)
         + notify(data: dict)
         + parse_file()
-        + analyze_line(line: String)
+        + extract_ip_and_payload(line: String) dict
+        + is_suspicious(payload: String) bool
     }
     
     class BaseAgent {
         # Config config
         # Client gemini_client
         # Client groq_client
-        + update(data: dict)
+        + name: String
     }
     
     class DetectiveAgent {
         + update(data: dict)
-        + analyze_threat(payload: String) dict
     }
     
     class RemediationAgent {
-        + update(data: dict)
-        + generate_remediation(threat_data: dict)
+        + handle_threat(threat_data: dict, original_data: dict)
+        + generate_remediation(threat_data: dict, original_data: dict) dict
     }
     
     Subject <|.. LogParser : implements
-    Observer <|.. BaseAgent : implements
+    Observer <|.. DetectiveAgent : implements
     BaseAgent <|-- DetectiveAgent : inherits
     BaseAgent <|-- RemediationAgent : inherits
     LogParser --> Observer : notifies
@@ -158,7 +158,7 @@ During the development of this project, Artificial Intelligence tools were utili
 - **Regex Parsing:** DeepSeek/Qwen models inject `<think>` blocks into their output. The AI assistant was used to write robust Regex (`re.sub`) to strip these blocks out so the incident reports could be formatted cleanly.
 
 ### 3. Automated Testing
-- **Test Generation:** The AI was utilized to generate a robust `pytest` suite (`tests/test_log_parser.py`). Rather than writing simple I/O tests manually, the AI was prompted to create a `MockAgent` class to formally verify that the Observer design pattern was correctly dispatching notifications only when malicious payloads were detected.
+- **Test Generation:** The AI was utilized to generate a robust `pytest` suite (`tests/`). Rather than writing simple I/O tests manually, the AI was prompted to create a `MockAgent` class to formally verify that the Observer design pattern was correctly dispatching notifications only when malicious payloads were detected.
 
 
 The use of AI tools significantly improved the structural integrity of the project (via Design Patterns) and reduced the time spent wrestling with API changes, allowing the core focus to remain on the cybersecurity logic and multi-agent workflows.
