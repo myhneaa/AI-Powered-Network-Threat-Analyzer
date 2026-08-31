@@ -22,8 +22,15 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
 ├── README.md             # Project documentation
 ├── reports/              # Auto-generated incident reports
 ├── requirements.txt      # Python dependencies
-└── tests/                # Automated pytest suite
-    └── test_log_parser.py
+├── tests/                # Automated pytest suite
+│   ├── test_agents.py
+│   ├── test_config.py
+│   └── test_log_parser.py
+└── uml/                  # Diagrams and architecture visuals
+    ├── mermaid.md
+    ├── uml.drawio
+    └── uml.drawio.png
+    
 ```
 
 ## How to Run
