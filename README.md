@@ -96,66 +96,7 @@ The system follows a clear data flow:
 
 ### Class Diagram (UML)
 
-```mermaid
-classDiagram
-    class Config {
-        - Config _instance
-        - bool _is_initialized
-        - String gemini_api_key
-        - String groq_api_key
-        + Config()
-        + get_gemini_api_key() String
-        + get_groq_api_key() String
-        + get_gemini_client() Client
-        + get_groq_client() Client
-    }
-    
-    class Subject {
-        <<interface>>
-        + attach(observer: Observer)
-        + detach(observer: Observer)
-        + notify(data: dict)
-    }
-    
-    class Observer {
-        <<interface>>
-        + update(data: dict)
-    }
-    
-    class LogParser {
-        - List~Observer~ observers
-        - String filepath
-        + attach(observer: Observer)
-        + detach(observer: Observer)
-        + notify(data: dict)
-        + parse_file()
-        + extract_ip_and_payload(line: String) dict
-        + is_suspicious(payload: String) bool
-    }
-    
-    class BaseAgent {
-        # Config config
-        # Client gemini_client
-        # Client groq_client
-        + name: String
-    }
-    
-    class DetectiveAgent {
-        + update(data: dict)
-    }
-    
-    class RemediationAgent {
-        + handle_threat(threat_data: dict, original_data: dict)
-        + generate_remediation(threat_data: dict, original_data: dict) dict
-    }
-    
-    Subject <|.. LogParser : implements
-    Observer <|.. DetectiveAgent : implements
-    BaseAgent <|-- DetectiveAgent : inherits
-    BaseAgent <|-- RemediationAgent : inherits
-    LogParser --> Observer : notifies
-    BaseAgent --> Config : uses
-```
+![Class Diagram (UML)](uml/uml.drawio.png)
 
 ### Design Patterns Used
 
@@ -191,3 +132,4 @@ The use of AI tools significantly improved the structural integrity of the proje
 - [Observer Design Pattern](https://www.geeksforgeeks.org/system-design/observer-pattern-set-1-introduction/)
 - [Example Apache Error log](https://raw.githubusercontent.com/logpai/loghub/master/Apache/Apache_2k.log)
 - [freeCodeCamp UML Diagrams Full Course](https://www.youtube.com/watch?v=WnMQ8HlmeXc)
+- [draw.io](https://draw.io)
