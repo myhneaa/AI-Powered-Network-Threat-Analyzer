@@ -10,12 +10,9 @@ from config import Config
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="NetworkGuard SOC", page_icon="🛡️", layout="wide")
 
-# --- CUSTOM CSS FOR HACKER AESTHETIC ---
+# --- CUSTOM CSS ---
 st.markdown("""
     <style>
-    .stApp {
-        background-color: #0E1117;
-    }
     .stExpander {
         border-color: #FF4B4B !important;
     }
@@ -69,6 +66,58 @@ with col1:
     else:
         st.info("System Secure. No incidents detected in the current logs.")
 
+    # --- TRIGGER BACKEND ANALYSIS ---
+    if st.session_state.get('run_analysis', False):
+        
+        # Custom class to capture print() statements and send them to both the Terminal and the Streamlit UI
+        import sys
+        class StreamlitCapture:
+            def __init__(self, placeholder):
+                self.placeholder = placeholder
+                self.buffer = ""
+            def write(self, data):
+                self.buffer += data
+                sys.__stdout__.write(data) # Keep standard terminal output
+                self.placeholder.code(self.buffer, language="bash") # Send to GUI
+            def flush(self):
+                sys.__stdout__.flush()
+
+        with st.spinner("Initiating Multi-Agent AI Analysis (Parsing logs...)"):
+            
+            st.subheader("💻 Live Terminal Log")
+            terminal_output = st.empty()
+            terminal_output.code("Initializing...", language="bash")
+            
+            # Ensure log file exists
+            log_file = "access.log"
+            if not os.path.exists(log_file):
+                with open(log_file, "w") as f:
+                    f.write('192.168.1.100 - - [10/Oct/2023:13:55:36 -0700] "GET /index.html HTTP/1.1" 200 1234\n')
+                    f.write('10.0.0.5 - - [10/Oct/2023:13:56:00 -0700] "GET /login?user=admin\' OR \'1\'=\'1 HTTP/1.1" 200 456\n')
+
+            # Run the backend architecture
+            parser = LogParser(log_file)
+            remediation_agent = RemediationAgent()
+            detective_agent = DetectiveAgent(remediation_agent=remediation_agent)
+            
+            parser.attach(detective_agent)
+            
+            # Redirect stdout to capture prints dynamically
+            old_stdout = sys.stdout
+            sys.stdout = StreamlitCapture(terminal_output)
+            
+            # Execute parsing
+            parser.parse_file()
+            
+            # Restore stdout
+            sys.stdout = old_stdout
+            
+        # Reset state and refresh UI to display new reports
+        st.session_state['run_analysis'] = False
+        st.success("Analysis Complete!")
+        time.sleep(1)
+        st.rerun()
+
 # Column 2: System Status & Metrics
 with col2:
     st.subheader("📡 System Status")
@@ -80,30 +129,3 @@ with col2:
         threat_count = 0
         
     st.metric(label="Threats Remediated", value=threat_count, delta=f"+{threat_count}" if threat_count > 0 else None, delta_color="inverse")
-
-# --- TRIGGER BACKEND ANALYSIS ---
-if st.session_state.get('run_analysis', False):
-    with st.spinner("Initiating Multi-Agent AI Analysis (Parsing logs...)"):
-        
-        # Ensure log file exists
-        log_file = "access.log"
-        if not os.path.exists(log_file):
-            with open(log_file, "w") as f:
-                f.write('192.168.1.100 - - [10/Oct/2023:13:55:36 -0700] "GET /index.html HTTP/1.1" 200 1234\n')
-                f.write('10.0.0.5 - - [10/Oct/2023:13:56:00 -0700] "GET /login?user=admin\' OR \'1\'=\'1 HTTP/1.1" 200 456\n')
-
-        # Run the backend architecture
-        parser = LogParser(log_file)
-        remediation_agent = RemediationAgent()
-        detective_agent = DetectiveAgent(remediation_agent=remediation_agent)
-        
-        parser.attach(detective_agent)
-        
-        # Execute parsing
-        parser.parse_file()
-        
-    # Reset state and refresh UI to display new reports
-    st.session_state['run_analysis'] = False
-    st.success("Analysis Complete!")
-    time.sleep(1)
-    st.rerun()

@@ -17,6 +17,7 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
 │   ├── detective_agent.py
 │   └── remediation_agent.py
 ├── config.py             # Configuration Singleton
+├── gui.py                # Streamlit Web Dashboard entry point
 ├── log_parser.py         # Log parser and Observer Subject
 ├── main.py               # Application entry point
 ├── README.md             # Project documentation
@@ -43,7 +44,7 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
    *(Note for Fish shell users [such as myself :p]: `source .venv/bin/activate.fish`)*
 
 2. **Install Dependencies:**
-   Install the required external packages (`google-genai`, `groq`, `pytest`, etc.):
+   Install the required external packages (`google-genai`, `groq`, `pytest`, `streamlit` etc.):
    ```bash
    pip install -r requirements.txt
    ```
@@ -56,7 +57,14 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
    ```
    *(Note: If you run the script without keys, it will fall back to a mock demonstration mode.)*
 
-4. **Run the Application:**
+4. **Run the Application (Two Modes Available):**
+   
+   **Option A: Modern Web Dashboard (Recommended)**
+   ```bash
+   streamlit run gui.py
+   ```
+
+   **Option B: Standard Terminal / CLI Mode**
    ```bash
    python main.py
    ```
@@ -84,8 +92,19 @@ NetworkGuard is an automated cybersecurity monitoring system that parses network
 - [x] Integrate Google Gemini for Threat Classification
 - [x] Integrate Groq (Mixtral) for Threat Mitigation & Report Generating
 - [x] Implement Pytest Suite and GitHub Actions
-- [ ] **Build a Graphical User Interface (GUI) for the SOC dashboard**
+- [x] **Build a Graphical User Interface (GUI) for the SOC dashboard**
 - [ ] Implement Asynchronous Message Queues (e.g., RabbitMQ/Kafka) for enterprise scalability
+
+---
+
+## Technologies Used
+
+- **Python 3** - Core programming language.
+- **Streamlit** - For building the interactive, real-time web dashboard.
+- **Pytest** - For automated unit and integration test coverage.
+- **Google GenAI SDK** - To communicate with Google's Gemini models for deep threat classification.
+- **Groq SDK** - To communicate with Meta's Llama-3/Mixtral models for rapid SOC remediation drafting.
+- **python-dotenv** - For secure environment variable and API key management.
 
 ---
 
