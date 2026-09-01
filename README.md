@@ -103,7 +103,7 @@ The system follows a clear data flow:
 
 ### Class Diagram (UML)
 
-![Class Diagram (UML)](uml/uml.drawio.png)
+![Class Diagram (UML)](uml/uml.drawio.png?raw=true)
 
 ### Design Patterns Used
 
