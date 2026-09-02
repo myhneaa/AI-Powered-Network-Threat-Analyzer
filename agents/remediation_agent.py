@@ -21,6 +21,9 @@ class RemediationAgent(BaseAgent):
         
         report_path = f"reports/incident_{original_data['ip'].replace('.', '_')}.txt"
         with open(report_path, "w") as f:
+            f.write("=== RECOMMENDED MITIGATION ===\n")
+            f.write(f"{report['firewall_rule']}\n\n")
+            f.write("=== INCIDENT REPORT ===\n")
             f.write(report['incident_report'])
         
         print(f"[{self.name}] Full report saved to {report_path}\n")
