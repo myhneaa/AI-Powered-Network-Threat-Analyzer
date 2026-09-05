@@ -47,7 +47,7 @@ def generate_logs(filename="access.log", num_lines=500):
         logs.insert(insert_idx, malicious_line)
 
     # Write to file
-    with open(filename, "w") as f:
+    with open(filename, "w", encoding="utf-8") as f:
         f.writelines(logs)
         
     print(f"\nSuccess! '{filename}' has been generated.")

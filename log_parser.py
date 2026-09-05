@@ -93,7 +93,7 @@ class LogParser(Subject):
         Reads the file line by line and triggers the analysis.
         """
         try:
-            with open(self.filepath, 'r') as f:
+            with open(self.filepath, 'r', encoding='utf-8', errors='replace') as f:
                 for line in f:
                     # Skip empty lines
                     if not line.strip():

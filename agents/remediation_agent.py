@@ -20,7 +20,7 @@ class RemediationAgent(BaseAgent):
             os.makedirs("reports")
         
         report_path = f"reports/incident_{original_data['ip'].replace('.', '_')}.txt"
-        with open(report_path, "w") as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write("=== RECOMMENDED MITIGATION ===\n")
             f.write(f"{report['firewall_rule']}\n\n")
             f.write("=== INCIDENT REPORT ===\n")
@@ -33,17 +33,16 @@ class RemediationAgent(BaseAgent):
         Uses Groq (e.g. Llama-3) to generate firewall rules and a formal report.
         """
         prompt = f"""
-        You are a SOC Analyst. We detected a {threat_data['classification']} attack with a risk score of {threat_data['risk_score']}/10.
-        The attacker IP is {original_data['ip']}.
+        You are a SOC Analyst. A {threat_data['classification']} attack was detected with risk {threat_data['risk_score']}/10 from IP {original_data['ip']}.
         
         1. Generate a Linux iptables command to block this IP.
-        2. Write a short, formal incident report.
+        2. Write a concise, complete incident report.
         
         Format the response with exact markers:
         ---FIREWALL RULE---
         <iptables command>
         ---REPORT---
-        <formal report text>
+        <report text>
         """
         
         try:
@@ -53,28 +52,52 @@ class RemediationAgent(BaseAgent):
                 report = f"INCIDENT REPORT\nType: {threat_data['classification']}\nIP: {original_data['ip']}\nRisk: {threat_data['risk_score']}/10\nReason: {threat_data['reason']}"
                 return {"firewall_rule": rule, "incident_report": report}
                 
-            response = self.groq_client.chat.completions.create(
-                model="qwen/qwen3.6-27b",
-                messages=[
-                    {"role": "system", "content": "You are a helpful SOC Analyst."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            text = response.choices[0].message.content
+            # Use gpt-oss-20b for higher rate limits (8000 OTPM vs 1000 OTPM) with low reasoning effort
+            response = None
+            try:
+                response = self.groq_client.chat.completions.create(
+                    model="openai/gpt-oss-20b",
+                    messages=[
+                        {"role": "system", "content": "You are a concise SOC analyst. Output ONLY the requested markers and text. Do not add commentary."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    reasoning_effort="low",
+                    max_tokens=400
+                )
+            except Exception as e:
+                # Fallback to qwen if needed
+                response = self.groq_client.chat.completions.create(
+                    model="qwen/qwen3.6-27b",
+                    messages=[
+                        {"role": "system", "content": "You are a concise SOC analyst. Output ONLY the requested markers and text."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=400
+                )
+            text = response.choices[0].message.content or ""
             
             # Remove <think> blocks if they exist (used by deepseek/qwen reasoning models)
             import re
             text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
             
-            rule = "iptables command not found"
-            report_text = "Report not found"
+            rule = f"iptables -A INPUT -s {original_data['ip']} -j DROP"
+            report_text = text
             
-            if "---FIREWALL RULE---" in text and "---REPORT---" in text:
-                rule_start = text.find("---FIREWALL RULE---") + len("---FIREWALL RULE---")
-                report_start = text.find("---REPORT---")
-                
-                rule = text[rule_start:report_start].strip()
-                report_text = text[report_start + len("---REPORT---"):].strip()
+            # Flexible marker search (tolerating optional markdown bold like **---FIREWALL RULE---**)
+            rule_match = re.search(r'---FIREWALL RULE---\s*([\s\S]*?)\s*---REPORT---', text, re.IGNORECASE)
+            if rule_match:
+                extracted_rule = rule_match.group(1).strip()
+                if extracted_rule:
+                    rule = extracted_rule
+                report_start = text.upper().find("---REPORT---") + len("---REPORT---")
+                report_text = text[report_start:].strip()
+            elif "iptables" in text.lower():
+                # Extract the iptables command line if markers were omitted
+                for line in text.splitlines():
+                    if "iptables" in line.lower():
+                        rule = line.strip("`* ")
+                        break
+                report_text = text.replace(rule, "").strip()
                 
             return {"firewall_rule": rule, "incident_report": report_text}
         except Exception as e:

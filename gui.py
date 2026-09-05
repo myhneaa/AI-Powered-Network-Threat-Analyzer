@@ -53,14 +53,25 @@ with col1:
         report_files = glob.glob("reports/*.txt")
         if report_files:
             for file in reversed(sorted(report_files)): # Show newest first
-                with open(file, "r") as f:
+                with open(file, "r", encoding="utf-8", errors="replace") as f:
                     content = f.read()
                 
                 # Extract IP from filename for the expander title
                 ip = os.path.basename(file).replace("incident_", "").replace(".txt", "").replace("_", ".")
                 
                 with st.expander(f"🔴 Critical Threat Prevented: {ip}", expanded=False):
-                    st.code(content, language="markdown")
+                    if "=== RECOMMENDED MITIGATION ===" in content and "=== INCIDENT REPORT ===" in content:
+                        parts = content.split("=== INCIDENT REPORT ===")
+                        mitigation_part = parts[0].replace("=== RECOMMENDED MITIGATION ===", "").strip()
+                        report_part = parts[1].strip()
+                        
+                        st.markdown("**🛡️ Recommended Firewall Mitigation:**")
+                        st.code(mitigation_part, language="bash")
+                        
+                        st.markdown("**📋 Incident Report:**")
+                        st.markdown(report_part)
+                    else:
+                        st.code(content, language="markdown")
         else:
             st.info("System Secure. No incidents detected in the current logs.")
     else:
@@ -77,10 +88,18 @@ with col1:
                 self.buffer = ""
             def write(self, data):
                 self.buffer += data
-                sys.__stdout__.write(data) # Keep standard terminal output
+                try:
+                    sys.__stdout__.write(data) # Keep standard terminal output
+                except UnicodeEncodeError:
+                    # Windows console fallback for characters not in current code page
+                    enc = sys.__stdout__.encoding or 'utf-8'
+                    sys.__stdout__.write(data.encode(enc, errors='replace').decode(enc))
                 self.placeholder.code(self.buffer, language="bash") # Send to GUI
             def flush(self):
-                sys.__stdout__.flush()
+                try:
+                    sys.__stdout__.flush()
+                except Exception:
+                    pass
 
         with st.spinner("Initiating Multi-Agent AI Analysis (Parsing logs...)"):
             
@@ -91,7 +110,7 @@ with col1:
             # Ensure log file exists
             log_file = "access.log"
             if not os.path.exists(log_file):
-                with open(log_file, "w") as f:
+                with open(log_file, "w", encoding="utf-8") as f:
                     f.write('192.168.1.100 - - [10/Oct/2023:13:55:36 -0700] "GET /index.html HTTP/1.1" 200 1234\n')
                     f.write('10.0.0.5 - - [10/Oct/2023:13:56:00 -0700] "GET /login?user=admin\' OR \'1\'=\'1 HTTP/1.1" 200 456\n')
 
@@ -120,8 +139,8 @@ with col1:
 
 # Column 2: System Status & Metrics
 with col2:
-    st.subheader("📡 System Status")
-    st.info("Monitoring Interface: **eth0**\n\nLog Source: **access.log**")
+    interface_name = "Ethernet / Wi-Fi" if os.name == "nt" else "eth0"
+    st.info(f"Monitoring Interface: **{interface_name}**\n\nLog Source: **access.log**")
     
     if os.path.exists("reports"):
         threat_count = len(glob.glob("reports/*.txt"))

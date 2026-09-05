@@ -1,4 +1,5 @@
 import json
+import re
 from agents.base_agent import BaseAgent
 from log_parser import Observer
 
@@ -24,7 +25,7 @@ class DetectiveAgent(BaseAgent, Observer):
 
     def analyze_threat(self, data: dict):
         """
-        Calls Gemini API to analyze the log line.
+        Calls Gemini API to analyze the log line with model fallback.
         """
         prompt = f"""
         You are an expert cybersecurity analyst. Analyze the following network request payload.
@@ -46,11 +47,24 @@ class DetectiveAgent(BaseAgent, Observer):
                     return {"is_threat": True, "classification": classification, "risk_score": 9, "reason": "Suspicious payload syntax found"}
                 return {"is_threat": False}
 
-            chat = self.gemini_client.chats.create(model='gemini-3.6-flash')
-            response = chat.send_message(prompt)
-            # Simple json parsing (assuming model follows instructions)
-            text = response.text.strip().replace("```json", "").replace("```", "")
-            result = json.loads(text)
+            response_text = None
+            for model_name in ["gemini-3.5-flash-lite", "gemini-3.6-flash"]:
+                try:
+                    chat = self.gemini_client.chats.create(model=model_name)
+                    response = chat.send_message(prompt)
+                    if response and response.text:
+                        response_text = response.text.strip()
+                        break
+                except Exception as model_err:
+                    print(f"[{self.name}] Warning: {model_name} busy or rate-limited ({str(model_err)}), trying fallback...")
+
+            if not response_text:
+                return None
+
+            # Extract JSON from potential markdown formatting
+            match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            json_str = match.group(0) if match else response_text
+            result = json.loads(json_str)
             
             if result.get("is_threat"):
                 return result
