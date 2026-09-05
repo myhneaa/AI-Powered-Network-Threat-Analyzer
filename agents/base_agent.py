@@ -1,5 +1,6 @@
 from config import Config
 
+
 class BaseAgent:
     """
     Base class for all AI Agents in the system.

@@ -1,6 +1,8 @@
+
 import pytest
-import os
+
 from log_parser import LogParser, Observer
+
 
 # --- Mock Observer for Testing ---
 class MockAgent(Observer):

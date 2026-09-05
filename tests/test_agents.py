@@ -1,7 +1,7 @@
-import pytest
 from agents.detective_agent import DetectiveAgent
 from agents.remediation_agent import RemediationAgent
 from config import Config
+
 
 def test_agent_initialization():
     """

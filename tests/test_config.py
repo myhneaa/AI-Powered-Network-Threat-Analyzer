@@ -1,6 +1,5 @@
-import pytest
-import os
 from config import Config
+
 
 def test_config_is_singleton():
     """

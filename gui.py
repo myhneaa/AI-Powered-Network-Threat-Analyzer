@@ -1,11 +1,13 @@
-import streamlit as st
-import os
 import glob
+import os
 import time
-from log_parser import LogParser
+
+import streamlit as st
+
 from agents.detective_agent import DetectiveAgent
 from agents.remediation_agent import RemediationAgent
 from config import Config
+from log_parser import LogParser
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="NetworkGuard SOC", page_icon="🛡️", layout="wide")
@@ -52,7 +54,7 @@ with col1:
     if os.path.exists("reports"):
         report_files = glob.glob("reports/*.txt")
         if report_files:
-            for file in reversed(sorted(report_files)): # Show newest first
+            for file in sorted(report_files, reverse=True): # Show newest first
                 with open(file, "r", encoding="utf-8", errors="replace") as f:
                     content = f.read()
                 

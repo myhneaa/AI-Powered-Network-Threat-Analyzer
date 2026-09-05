@@ -1,7 +1,9 @@
 import json
 import re
+
 from agents.base_agent import BaseAgent
 from log_parser import Observer
+
 
 class DetectiveAgent(BaseAgent, Observer):
     """
@@ -56,7 +58,7 @@ class DetectiveAgent(BaseAgent, Observer):
                         response_text = response.text.strip()
                         break
                 except Exception as model_err:
-                    print(f"[{self.name}] Warning: {model_name} busy or rate-limited ({str(model_err)}), trying fallback...")
+                    print(f"[{self.name}] Warning: {model_name} busy or rate-limited ({model_err!s}), trying fallback...")
 
             if not response_text:
                 return None
@@ -70,5 +72,5 @@ class DetectiveAgent(BaseAgent, Observer):
                 return result
             return None
         except Exception as e:
-            print(f"[{self.name}] Analysis error: {str(e)}")
+            print(f"[{self.name}] Analysis error: {e!s}")
             return None

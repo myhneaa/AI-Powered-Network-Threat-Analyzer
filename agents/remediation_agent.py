@@ -1,5 +1,8 @@
 import os
+import re
+
 from agents.base_agent import BaseAgent
+
 
 class RemediationAgent(BaseAgent):
     """
@@ -64,7 +67,7 @@ class RemediationAgent(BaseAgent):
                     reasoning_effort="low",
                     max_tokens=400
                 )
-            except Exception as e:
+            except Exception:
                 # Fallback to qwen if needed
                 response = self.groq_client.chat.completions.create(
                     model="qwen/qwen3.6-27b",
@@ -77,7 +80,6 @@ class RemediationAgent(BaseAgent):
             text = response.choices[0].message.content or ""
             
             # Remove <think> blocks if they exist (used by deepseek/qwen reasoning models)
-            import re
             text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
             
             rule = f"iptables -A INPUT -s {original_data['ip']} -j DROP"
@@ -101,5 +103,5 @@ class RemediationAgent(BaseAgent):
                 
             return {"firewall_rule": rule, "incident_report": report_text}
         except Exception as e:
-            print(f"[{self.name}] Remediation generation error: {str(e)}")
-            return {"firewall_rule": f"iptables -A INPUT -s {original_data['ip']} -j DROP", "incident_report": f"Error formatting report: {str(e)}"}
+            print(f"[{self.name}] Remediation generation error: {e!s}")
+            return {"firewall_rule": f"iptables -A INPUT -s {original_data['ip']} -j DROP", "incident_report": f"Error formatting report: {e!s}"}

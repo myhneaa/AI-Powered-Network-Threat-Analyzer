@@ -1,8 +1,10 @@
-from log_parser import LogParser
+import os
+
 from agents.detective_agent import DetectiveAgent
 from agents.remediation_agent import RemediationAgent
 from config import Config
-import os
+from log_parser import LogParser
+
 
 def main():
     print("="*50)

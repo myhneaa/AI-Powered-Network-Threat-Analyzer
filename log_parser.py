@@ -1,12 +1,13 @@
 import re
 import time
-from typing import List, Dict, Any
+from typing import Any
+
 
 class Observer:
     """
     Observer interface for receiving updates from the Subject.
     """
-    def update(self, data: Dict[str, Any]):
+    def update(self, data: dict[str, Any]):
         pass
 
 class Subject:
@@ -19,7 +20,7 @@ class Subject:
     def detach(self, observer: Observer):
         pass
 
-    def notify(self, data: Dict[str, Any]):
+    def notify(self, data: dict[str, Any]):
         pass
 
 class LogParser(Subject):
@@ -28,7 +29,7 @@ class LogParser(Subject):
     payload is found. Implements the Subject role in the Observer pattern.
     """
     def __init__(self, filepath: str):
-        self._observers: List[Observer] = []
+        self._observers: list[Observer] = []
         self.filepath = filepath
 
     def attach(self, observer: Observer):
@@ -39,11 +40,11 @@ class LogParser(Subject):
         if observer in self._observers:
             self._observers.remove(observer)
 
-    def notify(self, data: Dict[str, Any]):
+    def notify(self, data: dict[str, Any]):
         for observer in self._observers:
             observer.update(data)
 
-    def extract_ip_and_payload(self, line: str) -> Dict[str, str]:
+    def extract_ip_and_payload(self, line: str) -> dict[str, str]:
         """
         Simple extraction logic for Apache-like logs.
         Example format: 192.168.1.100 - - [10/Oct/2023:13:55:36 -0700] "GET /login?user=admin' OR '1'='1 HTTP/1.1" 200 2326
@@ -83,10 +84,7 @@ class LogParser(Subject):
         cmd_patterns = [";", "|", "&&", "$(", "`"]
         # Basic check to avoid flagging normal URLs with query params too aggressively, 
         # but in a security context, we flag and let AI decide.
-        if any(pattern in payload_upper for pattern in cmd_patterns):
-            return True
-            
-        return False
+        return any(pattern in payload_upper for pattern in cmd_patterns)
 
     def parse_file(self):
         """

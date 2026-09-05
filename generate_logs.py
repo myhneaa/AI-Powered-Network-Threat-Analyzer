@@ -1,5 +1,6 @@
-import random
 import datetime
+import random
+
 
 def generate_logs(filename="access.log", num_lines=500):
     # Normal endpoints and user agents
@@ -21,7 +22,7 @@ def generate_logs(filename="access.log", num_lines=500):
     ]
 
     logs = []
-    base_time = datetime.datetime.now() - datetime.timedelta(days=1)
+    base_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)
 
     print(f"Generating {num_lines} lines of normal traffic...")
     
