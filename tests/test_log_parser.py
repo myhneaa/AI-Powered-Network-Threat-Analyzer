@@ -1,4 +1,3 @@
-
 import pytest
 
 from log_parser import LogParser, Observer
